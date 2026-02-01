@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Planner Portal</title>
+    <title>Piyush & Prajakta's Wedding</title>
     <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Poppins', sans-serif; }
+        .font-script { font-family: 'Great Vibes', cursive; }
+        
         /* Custom Scrollbar for tables */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -20,8 +23,9 @@
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .tab-btn.active {
-            border-bottom: 2px solid #ec4899; /* Pink-500 */
-            color: #ec4899;
+            border-bottom: 3px solid #db2777; /* Pink-600 */
+            color: #be185d; /* Pink-700 */
+            background-color: #fdf2f8; /* Pink-50 */
         }
     </style>
 </head>
@@ -29,23 +33,40 @@
 
     <!-- LOGIN OVERLAY (Visible by default) -->
     <div id="login-screen" class="fixed inset-0 bg-pink-50 z-50 flex flex-col items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center border-t-4 border-pink-500">
             <div class="mb-6">
                 <i class="fa-solid fa-rings-wedding text-5xl text-pink-500 mb-2"></i>
-                <h1 class="text-3xl font-bold text-gray-800">Wedding Portal</h1>
-                <p class="text-gray-500 text-sm">Family Planning & Coordination</p>
+                <h1 class="text-4xl font-script text-gray-800">Piyush & Prajakta</h1>
+                <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest">Wedding Portal</p>
             </div>
             
             <div class="space-y-4">
                 <input type="email" id="email" placeholder="Email Address" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                 <input type="password" id="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                 
-                <div class="flex gap-2 justify-center text-sm text-gray-600 mb-2">
-                    <label><input type="radio" name="familySide" value="ladkewale" checked> Ladkewale (Groom)</label>
-                    <label><input type="radio" name="familySide" value="ladkiwale"> Ladkiwale (Bride)</label>
+                <!-- Side Selection Buttons -->
+                <div class="text-left">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-2">Login As:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Sharma Family Button -->
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="familySide" value="ladkewale" checked class="peer sr-only">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 text-gray-500 bg-white hover:bg-gray-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all text-center h-full flex flex-col items-center justify-center shadow-sm">
+                                <span class="text-sm font-bold">Sharma Family</span>
+                            </div>
+                        </label>
+                        
+                        <!-- Lasanpure Family Button -->
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="familySide" value="ladkiwale" class="peer sr-only">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 text-gray-500 bg-white hover:bg-gray-50 peer-checked:border-pink-500 peer-checked:bg-pink-50 peer-checked:text-pink-700 transition-all text-center h-full flex flex-col items-center justify-center shadow-sm">
+                                <span class="text-sm font-bold">Lasanpure Family</span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="flex gap-3">
+                <div class="flex gap-3 pt-2">
                     <button onclick="handleLogin()" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-md">
                         Login
                     </button>
@@ -61,57 +82,74 @@
         </div>
     </div>
 
-    <!-- QUICK ADD SCREEN (Hidden by default, used for "Quick Link" mode) -->
-    <div id="quick-add-screen" class="hidden fixed inset-0 bg-pink-600 z-50 flex flex-col items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md text-center">
-            <div class="mb-4">
-                <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-pink-600">
-                    <i class="fa-solid fa-user-plus text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800">Quick Guest Add</h2>
-                <p class="text-gray-500 text-xs">Simplified mode for family</p>
-            </div>
-
-            <div class="space-y-4 text-left">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Guest Name</label>
-                    <input type="text" id="quick-name" placeholder="E.g. Ramesh Uncle" class="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Relation / City</label>
-                    <input type="text" id="quick-relation" placeholder="E.g. Masi (Mumbai)" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
+    <!-- QUICK ADD SCREEN -->
+    <div id="quick-add-screen" class="hidden fixed inset-0 bg-pink-50 z-50 overflow-y-auto">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md text-center my-4 border-t-4 border-pink-500">
+                <div class="mb-4">
+                    <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-pink-600">
+                        <i class="fa-solid fa-user-plus text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Quick Guest Add</h2>
+                    <p class="text-gray-500 text-xs">Piyush & Prajakta</p>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Adding for Side</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="quickSide" value="ladkewale" class="peer hidden" checked>
-                            <div class="p-3 border rounded-lg text-center peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 text-gray-500">
-                                👳‍♂️ Ladkewale
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="quickSide" value="ladkiwale" class="peer hidden">
-                            <div class="p-3 border rounded-lg text-center peer-checked:bg-pink-50 peer-checked:border-pink-500 peer-checked:text-pink-700 text-gray-500">
-                                👰 Ladkiwale
-                            </div>
-                        </label>
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Guest Name</label>
+                        <input type="text" id="quick-name" placeholder="E.g. Ramesh Uncle" class="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Relation / City</label>
+                        <input type="text" id="quick-relation" placeholder="E.g. Masi (Mumbai)" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Plus Members</label>
+                            <input type="number" id="quick-plus" min="0" value="0" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 text-center font-bold">
+                            <p class="text-[10px] text-gray-400 mt-1">Extra people excluding guest</p>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Adding for Side</label>
+                            <select id="quick-side-select" class="w-full p-3 border-2 border-gray-200 rounded-xl bg-white focus:outline-none focus:border-pink-500 text-sm">
+                                <option value="ladkewale">Sharma Family</option>
+                                <option value="ladkiwale">Lasanpure Family</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Events Inviting To</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 bg-white">
+                                <input type="checkbox" id="quick-meh" class="w-5 h-5 text-pink-600 rounded"> <span class="text-sm font-medium">Mehendi</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 bg-white">
+                                <input type="checkbox" id="quick-san" class="w-5 h-5 text-pink-600 rounded" checked> <span class="text-sm font-medium">Sangeet</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 bg-white">
+                                <input type="checkbox" id="quick-wed" class="w-5 h-5 text-pink-600 rounded" checked> <span class="text-sm font-medium">Wedding</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 bg-white">
+                                <input type="checkbox" id="quick-rec" class="w-5 h-5 text-pink-600 rounded" checked> <span class="text-sm font-medium">Reception</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="handleQuickAddSubmit()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl transition shadow-lg text-lg flex justify-center items-center gap-2 mt-4">
+                        Add Guest <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                    
+                    <div id="quick-success" class="hidden text-green-600 text-sm font-bold bg-green-50 p-2 rounded text-center">
+                        <i class="fa-solid fa-check-circle"></i> Added Successfully!
                     </div>
                 </div>
-
-                <button onclick="handleQuickAddSubmit()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl transition shadow-lg text-lg flex justify-center items-center gap-2">
-                    Add Guest <i class="fa-solid fa-paper-plane"></i>
-                </button>
                 
-                <div id="quick-success" class="hidden text-green-600 text-sm font-bold bg-green-50 p-2 rounded text-center">
-                    <i class="fa-solid fa-check-circle"></i> Added Successfully!
+                <div class="mt-6 pt-4 border-t">
+                    <a href="index.html" class="text-xs text-gray-400 underline">Go to Full Login</a>
                 </div>
-            </div>
-            
-            <div class="mt-6 pt-4 border-t">
-                <a href="index.html" class="text-xs text-gray-400 underline">Go to Full Login</a>
             </div>
         </div>
     </div>
@@ -120,28 +158,28 @@
     <div id="app-content" class="hidden flex-col h-full">
         
         <!-- HEADER -->
-        <header class="bg-white shadow-sm z-10">
+        <header class="bg-gradient-to-r from-pink-500 to-rose-600 shadow-md z-10 text-white">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="bg-pink-100 p-2 rounded-full text-pink-600">
-                        <i class="fa-solid fa-heart"></i>
+                    <div class="bg-white/20 p-2 rounded-full">
+                        <i class="fa-solid fa-rings-wedding"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg leading-tight">Wedding Prep</h1>
-                        <p class="text-xs text-gray-500" id="user-display">Logged in as Family</p>
+                        <h1 class="font-bold text-lg leading-tight font-script text-2xl">Piyush & Prajakta</h1>
+                        <p class="text-xs opacity-90" id="user-display">Logged in</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-gray-500 hover:text-red-500 text-sm">
+                <button onclick="logout()" class="text-white/80 hover:text-white text-sm">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
             </div>
             
             <!-- NAVIGATION TABS -->
-            <nav class="flex overflow-x-auto border-b border-gray-200 px-4 text-sm font-medium text-gray-600">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active px-4 py-3 whitespace-nowrap">Dashboard</button>
-                <button onclick="switchTab('guests')" id="tab-guests" class="tab-btn px-4 py-3 whitespace-nowrap">Guest List</button>
-                <button onclick="switchTab('lenden')" id="tab-lenden" class="tab-btn px-4 py-3 whitespace-nowrap">Len-Den (Gifts)</button>
-                <button onclick="switchTab('tasks')" id="tab-tasks" class="tab-btn px-4 py-3 whitespace-nowrap">Tasks</button>
+            <nav class="flex overflow-x-auto bg-white text-gray-600 text-sm font-medium shadow-inner">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active px-6 py-3 whitespace-nowrap">Dashboard</button>
+                <button onclick="switchTab('guests')" id="tab-guests" class="tab-btn px-6 py-3 whitespace-nowrap">Guest List</button>
+                <button onclick="switchTab('lenden')" id="tab-lenden" class="tab-btn px-6 py-3 whitespace-nowrap">Len-Den (Gifts)</button>
+                <button onclick="switchTab('tasks')" id="tab-tasks" class="tab-btn px-6 py-3 whitespace-nowrap">Tasks</button>
             </nav>
         </header>
 
@@ -151,68 +189,80 @@
             <!-- TAB: DASHBOARD -->
             <div id="view-dashboard" class="space-y-6 max-w-6xl mx-auto">
                 <!-- Countdown -->
-                <div class="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg">
-                    <p class="uppercase tracking-widest text-xs opacity-80 mb-1">Time Remaining</p>
-                    <h2 class="text-3xl font-bold mb-2">The Big Day</h2>
+                <div class="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
+                    <!-- Decor Circles -->
+                    <div class="absolute top-0 left-0 w-20 h-20 bg-white/10 rounded-full -translate-x-10 -translate-y-10"></div>
+                    <div class="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-10 translate-y-10"></div>
+                    
+                    <p class="uppercase tracking-widest text-xs opacity-80 mb-1">Shubh Vivah In</p>
+                    <h2 class="text-4xl font-script mb-4">The Big Day</h2>
                     <div class="flex justify-center gap-4 text-center">
-                        <div class="bg-white/20 rounded-lg p-2 min-w-[60px]"><span class="block text-xl font-bold">124</span><span class="text-xs">Days</span></div>
-                        <div class="bg-white/20 rounded-lg p-2 min-w-[60px]"><span class="block text-xl font-bold">14</span><span class="text-xs">Hrs</span></div>
+                        <div class="bg-black/20 backdrop-blur-sm rounded-lg p-3 min-w-[70px]"><span class="block text-2xl font-bold">124</span><span class="text-xs uppercase">Days</span></div>
+                        <div class="bg-black/20 backdrop-blur-sm rounded-lg p-3 min-w-[70px]"><span class="block text-2xl font-bold">14</span><span class="text-xs uppercase">Hrs</span></div>
                     </div>
                 </div>
 
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-yellow-400">
-                        <p class="text-gray-500 text-xs">Total Guests</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="stat-total-guests">0</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-yellow-400">
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Total Guests</p>
+                        <h3 class="text-3xl font-bold text-gray-800 mt-1" id="stat-total-guests">0</h3>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-400">
-                        <p class="text-gray-500 text-xs">Ladkewale</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="stat-ladkewale">0</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-blue-400">
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Sharma Family</p>
+                        <h3 class="text-3xl font-bold text-gray-800 mt-1" id="stat-ladkewale">0</h3>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-400">
-                        <p class="text-gray-500 text-xs">Ladkiwale</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="stat-ladkiwale">0</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-pink-400">
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Lasanpure Family</p>
+                        <h3 class="text-3xl font-bold text-gray-800 mt-1" id="stat-ladkiwale">0</h3>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-400">
-                        <p class="text-gray-500 text-xs">Pending Tasks</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="stat-tasks">0</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-purple-400">
+                        <p class="text-gray-500 text-xs uppercase tracking-wide">Pending Tasks</p>
+                        <h3 class="text-3xl font-bold text-gray-800 mt-1" id="stat-tasks">0</h3>
                     </div>
                 </div>
                 
                 <!-- Share Link Box -->
-                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="bg-white border border-gray-200 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
                     <div class="flex items-center gap-3">
-                        <div class="bg-white p-2 rounded-full text-blue-600 shadow-sm"><i class="fa-solid fa-link"></i></div>
+                        <div class="bg-blue-50 p-3 rounded-full text-blue-600"><i class="fa-solid fa-link"></i></div>
                         <div>
-                            <h3 class="font-bold text-blue-800 text-sm">Quick Link for Parents</h3>
-                            <p class="text-xs text-blue-600">Send this link to family to let them add guests easily without login.</p>
+                            <h3 class="font-bold text-gray-800 text-sm">Quick Link for Relatives</h3>
+                            <p class="text-xs text-gray-500">Send to family WhatsApp groups for easy guest entry.</p>
                         </div>
                     </div>
-                    <button onclick="copyQuickLink()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700">
+                    <button onclick="copyQuickLink()" class="bg-gray-800 text-white px-5 py-2 rounded-lg text-sm font-bold shadow hover:bg-black transition">
                         Copy Link
                     </button>
                 </div>
 
-                <!-- Event Breakdown -->
+                <!-- Event Breakdown with ICONS -->
                 <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Event Headcounts</h3>
+                    <h3 class="font-bold text-gray-700 mb-6 border-b pb-2">Event Headcounts</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div class="bg-orange-50 p-3 rounded-lg">
-                            <span class="block text-orange-600 font-bold text-xl" id="count-mehendi">0</span>
-                            <span class="text-xs text-gray-500">Mehendi</span>
+                        <!-- Mehendi -->
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                            <i class="fa-solid fa-hand-sparkles text-2xl text-green-600 mb-2"></i>
+                            <span class="block text-green-800 font-bold text-2xl" id="count-mehendi">0</span>
+                            <span class="text-xs text-green-600 font-medium uppercase">Mehendi</span>
                         </div>
-                        <div class="bg-pink-50 p-3 rounded-lg">
-                            <span class="block text-pink-600 font-bold text-xl" id="count-sangeet">0</span>
-                            <span class="text-xs text-gray-500">Sangeet</span>
+                        <!-- Sangeet -->
+                        <div class="bg-pink-50 p-4 rounded-xl border border-pink-100">
+                            <i class="fa-solid fa-music text-2xl text-pink-600 mb-2"></i>
+                            <span class="block text-pink-800 font-bold text-2xl" id="count-sangeet">0</span>
+                            <span class="text-xs text-pink-600 font-medium uppercase">Sangeet</span>
                         </div>
-                        <div class="bg-red-50 p-3 rounded-lg">
-                            <span class="block text-red-600 font-bold text-xl" id="count-wedding">0</span>
-                            <span class="text-xs text-gray-500">Wedding</span>
+                        <!-- Wedding -->
+                        <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                            <i class="fa-solid fa-fire text-2xl text-orange-600 mb-2"></i>
+                            <span class="block text-orange-800 font-bold text-2xl" id="count-wedding">0</span>
+                            <span class="text-xs text-orange-600 font-medium uppercase">Wedding</span>
                         </div>
-                        <div class="bg-purple-50 p-3 rounded-lg">
-                            <span class="block text-purple-600 font-bold text-xl" id="count-reception">0</span>
-                            <span class="text-xs text-gray-500">Reception</span>
+                        <!-- Reception -->
+                        <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                            <i class="fa-solid fa-utensils text-2xl text-purple-600 mb-2"></i>
+                            <span class="block text-purple-800 font-bold text-2xl" id="count-reception">0</span>
+                            <span class="text-xs text-purple-600 font-medium uppercase">Reception</span>
                         </div>
                     </div>
                 </div>
@@ -233,7 +283,7 @@
                         <thead class="bg-gray-100 text-gray-600 font-medium">
                             <tr>
                                 <th class="px-4 py-3">Name</th>
-                                <th class="px-4 py-3">Side</th>
+                                <th class="px-4 py-3">Family Side</th>
                                 <th class="px-4 py-3 text-center">Meh</th>
                                 <th class="px-4 py-3 text-center">San</th>
                                 <th class="px-4 py-3 text-center">Wed</th>
@@ -262,8 +312,8 @@
                     <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-blue-500">
                         <div class="flex justify-between items-center mb-4 border-b pb-2">
                             <div>
-                                <h3 class="font-bold text-blue-800">Ladkewale Requirements</h3>
-                                <p class="text-xs text-gray-500">To be bought by Ladkiwale</p>
+                                <h3 class="font-bold text-blue-800">Sharma Family Requirements</h3>
+                                <p class="text-xs text-gray-500">To be bought by Lasanpure Family</p>
                             </div>
                             <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">Groom's Wishlist</span>
                         </div>
@@ -276,8 +326,8 @@
                     <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-pink-500">
                         <div class="flex justify-between items-center mb-4 border-b pb-2">
                             <div>
-                                <h3 class="font-bold text-pink-800">Ladkiwale Requirements</h3>
-                                <p class="text-xs text-gray-500">To be bought by Ladkewale</p>
+                                <h3 class="font-bold text-pink-800">Lasanpure Family Requirements</h3>
+                                <p class="text-xs text-gray-500">To be bought by Sharma Family</p>
                             </div>
                             <span class="bg-pink-100 text-pink-600 text-xs px-2 py-1 rounded-full">Bride's Wishlist</span>
                         </div>
@@ -318,9 +368,14 @@
                 <input type="text" id="guest-name" placeholder="Guest Name" class="w-full border p-2 rounded">
                 <input type="text" id="guest-relation" placeholder="Relation (e.g. Masi, Friend)" class="w-full border p-2 rounded">
                 <select id="guest-side" class="w-full border p-2 rounded bg-white">
-                    <option value="ladkewale">Ladkewale (Groom Side)</option>
-                    <option value="ladkiwale">Ladkiwale (Bride Side)</option>
+                    <option value="ladkewale">Sharma Family (Ladkewale)</option>
+                    <option value="ladkiwale">Lasanpure Family (Ladkiwale)</option>
                 </select>
+                <!-- Add Plus member field to normal modal too for consistency -->
+                <div>
+                     <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Plus Members</label>
+                     <input type="number" id="guest-plus" min="0" value="0" class="w-full border p-2 rounded" placeholder="0">
+                </div>
                 <div class="grid grid-cols-2 gap-4 pt-2">
                     <label class="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
                         <input type="checkbox" id="check-mehendi" class="w-4 h-4 text-pink-600"> <span class="text-sm">Mehendi</span>
@@ -390,8 +445,8 @@
 
         // MOCK DATA FOR DEMO MODE
         const mockGuests = [
-            { id: 1, name: "Ramesh Uncle", side: "ladkewale", events: { meh: false, san: true, wed: true, rec: true } },
-            { id: 2, name: "Sita Masi", side: "ladkiwale", events: { meh: true, san: true, wed: true, rec: true } },
+            { id: 1, name: "Ramesh Uncle", relation: "Uncle", side: "ladkewale", plusGuests: 1, events: { meh: false, san: true, wed: true, rec: true } },
+            { id: 2, name: "Sita Masi", relation: "Aunt", side: "ladkiwale", plusGuests: 0, events: { meh: true, san: true, wed: true, rec: true } },
         ];
         const mockGifts = [
             { id: 1, item: "Sherwani Fabric", details: "Cream color", reqBy: "ladkewale", status: "pending" },
@@ -496,10 +551,13 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-content').classList.remove('hidden');
             document.getElementById('app-content').classList.add('flex');
-            document.getElementById('user-display').innerText = `Logged in as ${userSide.toUpperCase()} Family`;
+            
+            // Map generic side to family name
+            const familyName = userSide === 'ladkewale' ? 'Sharma Family' : 'Lasanpure Family';
+            document.getElementById('user-display').innerText = `Logged in as ${familyName}`;
             
             // Set modal hidden input defaults
-            document.getElementById('gift-requesting-side').innerText = userSide;
+            document.getElementById('gift-requesting-side').innerText = familyName;
             
             loadData();
         }
@@ -558,25 +616,37 @@
             let stats = { total: 0, ladkewale: 0, ladkiwale: 0, meh: 0, san: 0, wed: 0, rec: 0 };
 
             guests.forEach(g => {
-                // Update Stats
-                stats.total++;
-                if (g.side === 'ladkewale') stats.ladkewale++; else stats.ladkiwale++;
-                if (g.events.meh) stats.meh++;
-                if (g.events.san) stats.san++;
-                if (g.events.wed) stats.wed++;
-                if (g.events.rec) stats.rec++;
+                // Determine group size (Main Guest + Plus Members)
+                const groupSize = 1 + (parseInt(g.plusGuests) || 0);
 
-                // Row Color Logic
-                const sideColor = g.side === 'ladkewale' ? 'text-blue-600 bg-blue-50' : 'text-pink-600 bg-pink-50';
+                // Update Stats (Now accounts for Group Size!)
+                stats.total += groupSize;
+                
+                if (g.side === 'ladkewale') stats.ladkewale += groupSize; else stats.ladkiwale += groupSize;
+                
+                if (g.events.meh) stats.meh += groupSize;
+                if (g.events.san) stats.san += groupSize;
+                if (g.events.wed) stats.wed += groupSize;
+                if (g.events.rec) stats.rec += groupSize;
+
+                // Row Color Logic (Subtle distinction)
+                const sideColor = g.side === 'ladkewale' 
+                    ? 'text-blue-700 bg-blue-50' 
+                    : 'text-pink-700 bg-pink-50';
+                
+                const sideLabel = g.side === 'ladkewale' ? 'Sharma' : 'Lasanpure';
+                
+                // Display name logic
+                const nameDisplay = g.plusGuests > 0 ? `${g.name} <span class='text-xs font-bold text-gray-500 bg-gray-100 px-1 rounded'>+${g.plusGuests}</span>` : g.name;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
                 tr.innerHTML = `
                     <td class="px-4 py-3 font-medium text-gray-800">
-                        ${g.name}
+                        ${nameDisplay}
                         <div class="text-xs text-gray-400 font-normal">${g.relation || ''}</div>
                     </td>
-                    <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-bold uppercase ${sideColor}">${g.side}</span></td>
+                    <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-bold uppercase ${sideColor}">${sideLabel}</span></td>
                     <td class="px-4 py-3 text-center">${renderCheck(g, 'meh')}</td>
                     <td class="px-4 py-3 text-center">${renderCheck(g, 'san')}</td>
                     <td class="px-4 py-3 text-center">${renderCheck(g, 'wed')}</td>
@@ -600,6 +670,7 @@
 
         function renderCheck(guest, eventKey) {
             const isChecked = guest.events[eventKey];
+            // Update color to match theme (generic green for 'yes')
             const icon = isChecked ? 'fa-circle-check text-green-500' : 'fa-circle text-gray-200';
             // Click handler uses global scope exposure logic below
             return `<i class="fa-regular ${icon} text-lg cursor-pointer" onclick="toggleEvent('${guest.id}', '${eventKey}', ${!isChecked})"></i>`;
@@ -677,7 +748,8 @@
         window.handleQuickAddSubmit = async () => {
             const name = document.getElementById('quick-name').value;
             const relation = document.getElementById('quick-relation').value;
-            const side = document.querySelector('input[name="quickSide"]:checked').value;
+            const side = document.getElementById('quick-side-select').value;
+            const plusGuests = document.getElementById('quick-plus').value || 0;
             const successMsg = document.getElementById('quick-success');
 
             if (!name) {
@@ -689,30 +761,37 @@
                 name: name,
                 relation: relation,
                 side: side,
-                events: { meh: false, san: true, wed: true, rec: true }, // Defaults
+                plusGuests: parseInt(plusGuests),
+                events: { 
+                    meh: document.getElementById('quick-meh').checked,
+                    san: document.getElementById('quick-san').checked,
+                    wed: document.getElementById('quick-wed').checked,
+                    rec: document.getElementById('quick-rec').checked,
+                },
                 addedBy: 'QuickLink',
                 createdAt: new Date()
             };
 
             if (isDemoMode) {
                 alert("Demo Mode: Added!");
-                document.getElementById('quick-name').value = '';
-                document.getElementById('quick-relation').value = '';
+                resetQuickForm();
             } else {
                 try {
                     await addDoc(collection(db, "guests"), newGuest);
-                    // Show success feedback
                     successMsg.classList.remove('hidden');
-                    // Reset form
-                    document.getElementById('quick-name').value = '';
-                    document.getElementById('quick-relation').value = '';
-                    // Hide success msg after 3s
+                    resetQuickForm();
                     setTimeout(() => successMsg.classList.add('hidden'), 3000);
                 } catch (e) {
                     alert("Error adding guest: " + e.message);
                 }
             }
         };
+
+        function resetQuickForm() {
+             document.getElementById('quick-name').value = '';
+             document.getElementById('quick-relation').value = '';
+             document.getElementById('quick-plus').value = '0';
+        }
 
         window.copyQuickLink = () => {
             const url = window.location.href.split('?')[0] + '?mode=quick';
@@ -730,6 +809,7 @@
                 name: name,
                 relation: document.getElementById('guest-relation').value,
                 side: document.getElementById('guest-side').value,
+                plusGuests: parseInt(document.getElementById('guest-plus').value || 0),
                 events: {
                     meh: document.getElementById('check-mehendi').checked,
                     san: document.getElementById('check-sangeet').checked,
@@ -747,7 +827,8 @@
                 await addDoc(collection(db, "guests"), newGuest);
             }
             closeModal('guest-modal');
-            document.getElementById('guest-name').value = ''; // Reset
+            document.getElementById('guest-name').value = ''; 
+            document.getElementById('guest-plus').value = '0';
         };
 
         window.toggleEvent = async (id, eventKey, newVal) => {
