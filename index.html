@@ -45,11 +45,17 @@
                     <label><input type="radio" name="familySide" value="ladkiwale"> Ladkiwale (Bride)</label>
                 </div>
 
-                <button onclick="handleLogin()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-md">
-                    Enter Portal
-                </button>
+                <div class="flex gap-3">
+                    <button onclick="handleLogin()" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                        Login
+                    </button>
+                    <button onclick="handleRegister()" class="flex-1 bg-white border border-pink-600 text-pink-600 hover:bg-pink-50 font-bold py-3 rounded-lg transition shadow-md">
+                        Register
+                    </button>
+                </div>
+
                 <p class="text-xs text-gray-400 mt-4">
-                    Note: First time? Just enter details and click Enter to register automatically (Demo Mode).
+                    First time? Enter your email/password and click <b>Register</b>.
                 </p>
             </div>
         </div>
@@ -302,7 +308,7 @@
         // ---------------------------------------------------
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Global State
@@ -351,10 +357,37 @@
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
                 } catch (error) {
-                    alert("Login failed: " + error.message + "\n(Note: You need to create users in Firebase Console first, or just use Demo Mode)");
+                    alert("Login failed: " + error.message + "\n(Tip: If this is your first time, click 'Register' instead)");
                 }
             } else {
                 // Fake Login
+                currentUser = { email: email, side: userSide };
+                showApp();
+            }
+        };
+
+        window.handleRegister = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const sideRadio = document.querySelector('input[name="familySide"]:checked').value;
+            
+            if (!email || !password) {
+                alert("Please enter an email and password to register.");
+                return;
+            }
+
+            userSide = sideRadio;
+
+            if (!isDemoMode) {
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    // Login happens automatically on success of createUser
+                    // onAuthStateChanged will catch it and call showApp()
+                } catch (error) {
+                    alert("Registration failed: " + error.message);
+                }
+            } else {
+                alert("Demo Mode: Registered successfully!");
                 currentUser = { email: email, side: userSide };
                 showApp();
             }
