@@ -61,6 +61,61 @@
         </div>
     </div>
 
+    <!-- QUICK ADD SCREEN (Hidden by default, used for "Quick Link" mode) -->
+    <div id="quick-add-screen" class="hidden fixed inset-0 bg-pink-600 z-50 flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md text-center">
+            <div class="mb-4">
+                <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-pink-600">
+                    <i class="fa-solid fa-user-plus text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Quick Guest Add</h2>
+                <p class="text-gray-500 text-xs">Simplified mode for family</p>
+            </div>
+
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Guest Name</label>
+                    <input type="text" id="quick-name" placeholder="E.g. Ramesh Uncle" class="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Relation / City</label>
+                    <input type="text" id="quick-relation" placeholder="E.g. Masi (Mumbai)" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Adding for Side</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="quickSide" value="ladkewale" class="peer hidden" checked>
+                            <div class="p-3 border rounded-lg text-center peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 text-gray-500">
+                                👳‍♂️ Ladkewale
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="quickSide" value="ladkiwale" class="peer hidden">
+                            <div class="p-3 border rounded-lg text-center peer-checked:bg-pink-50 peer-checked:border-pink-500 peer-checked:text-pink-700 text-gray-500">
+                                👰 Ladkiwale
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="handleQuickAddSubmit()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl transition shadow-lg text-lg flex justify-center items-center gap-2">
+                    Add Guest <i class="fa-solid fa-paper-plane"></i>
+                </button>
+                
+                <div id="quick-success" class="hidden text-green-600 text-sm font-bold bg-green-50 p-2 rounded text-center">
+                    <i class="fa-solid fa-check-circle"></i> Added Successfully!
+                </div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t">
+                <a href="index.html" class="text-xs text-gray-400 underline">Go to Full Login</a>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN APP CONTENT (Hidden until logged in) -->
     <div id="app-content" class="hidden flex-col h-full">
         
@@ -123,6 +178,20 @@
                         <p class="text-gray-500 text-xs">Pending Tasks</p>
                         <h3 class="text-2xl font-bold text-gray-800" id="stat-tasks">0</h3>
                     </div>
+                </div>
+                
+                <!-- Share Link Box -->
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white p-2 rounded-full text-blue-600 shadow-sm"><i class="fa-solid fa-link"></i></div>
+                        <div>
+                            <h3 class="font-bold text-blue-800 text-sm">Quick Link for Parents</h3>
+                            <p class="text-xs text-blue-600">Send this link to family to let them add guests easily without login.</p>
+                        </div>
+                    </div>
+                    <button onclick="copyQuickLink()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700">
+                        Copy Link
+                    </button>
                 </div>
 
                 <!-- Event Breakdown -->
@@ -308,7 +377,7 @@
         // ---------------------------------------------------
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Global State
@@ -317,6 +386,7 @@
         let currentUser = null;
         let userSide = "ladkewale"; // default
         let isDemoMode = true; // Falls back to local storage if firebase fails
+        let isQuickMode = false;
 
         // MOCK DATA FOR DEMO MODE
         const mockGuests = [
@@ -344,6 +414,28 @@
             console.warn("Running in DEMO MODE (Local Storage)");
             isDemoMode = true;
         }
+
+        // --- INITIALIZATION LOGIC ---
+        window.onload = async () => {
+            // Check for Quick Add Mode via URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'quick') {
+                isQuickMode = true;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('quick-add-screen').classList.remove('hidden');
+                
+                // Auto-login anonymously for quick mode if not logged in
+                if (!isDemoMode && !auth.currentUser) {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error("Anon Auth Failed", e);
+                    }
+                }
+            } else {
+                // Normal Mode: Auth listener handles the screens
+            }
+        };
 
         // --- AUTH FUNCTIONS ---
         window.handleLogin = async () => {
@@ -399,6 +491,8 @@
         };
 
         function showApp() {
+            if (isQuickMode) return; // Don't show full app in quick mode
+
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-content').classList.remove('hidden');
             document.getElementById('app-content').classList.add('flex');
@@ -416,10 +510,14 @@
                     currentUser = user;
                     // In a real app, we'd store 'side' in the user profile. 
                     // Here we assume session storage or re-selection for simplicity.
-                    showApp();
+                    
+                    // Only show full app if NOT in quick mode
+                    if (!isQuickMode) showApp();
                 } else {
-                    document.getElementById('login-screen').classList.remove('hidden');
-                    document.getElementById('app-content').classList.add('hidden');
+                    if (!isQuickMode) {
+                        document.getElementById('login-screen').classList.remove('hidden');
+                        document.getElementById('app-content').classList.add('hidden');
+                    }
                 }
             });
         }
@@ -574,6 +672,54 @@
 
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // QUICK ADD ACTIONS
+        window.handleQuickAddSubmit = async () => {
+            const name = document.getElementById('quick-name').value;
+            const relation = document.getElementById('quick-relation').value;
+            const side = document.querySelector('input[name="quickSide"]:checked').value;
+            const successMsg = document.getElementById('quick-success');
+
+            if (!name) {
+                alert("Please enter a name");
+                return;
+            }
+
+            const newGuest = {
+                name: name,
+                relation: relation,
+                side: side,
+                events: { meh: false, san: true, wed: true, rec: true }, // Defaults
+                addedBy: 'QuickLink',
+                createdAt: new Date()
+            };
+
+            if (isDemoMode) {
+                alert("Demo Mode: Added!");
+                document.getElementById('quick-name').value = '';
+                document.getElementById('quick-relation').value = '';
+            } else {
+                try {
+                    await addDoc(collection(db, "guests"), newGuest);
+                    // Show success feedback
+                    successMsg.classList.remove('hidden');
+                    // Reset form
+                    document.getElementById('quick-name').value = '';
+                    document.getElementById('quick-relation').value = '';
+                    // Hide success msg after 3s
+                    setTimeout(() => successMsg.classList.add('hidden'), 3000);
+                } catch (e) {
+                    alert("Error adding guest: " + e.message);
+                }
+            }
+        };
+
+        window.copyQuickLink = () => {
+            const url = window.location.href.split('?')[0] + '?mode=quick';
+            navigator.clipboard.writeText(url).then(() => {
+                alert("Link copied! Send this to your family.");
+            });
+        };
 
         // GUEST ACTIONS
         window.submitGuest = async () => {
