@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Planner Portal</title>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        /* Custom Scrollbar for tables */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .tab-btn.active {
+            border-bottom: 2px solid #ec4899; /* Pink-500 */
+            color: #ec4899;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- LOGIN OVERLAY (Visible by default) -->
+    <div id="login-screen" class="fixed inset-0 bg-pink-50 z-50 flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
+            <div class="mb-6">
+                <i class="fa-solid fa-rings-wedding text-5xl text-pink-500 mb-2"></i>
+                <h1 class="text-3xl font-bold text-gray-800">Wedding Portal</h1>
+                <p class="text-gray-500 text-sm">Family Planning & Coordination</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="Email Address" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                <input type="password" id="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                
+                <div class="flex gap-2 justify-center text-sm text-gray-600 mb-2">
+                    <label><input type="radio" name="familySide" value="ladkewale" checked> Ladkewale (Groom)</label>
+                    <label><input type="radio" name="familySide" value="ladkiwale"> Ladkiwale (Bride)</label>
+                </div>
+
+                <button onclick="handleLogin()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                    Enter Portal
+                </button>
+                <p class="text-xs text-gray-400 mt-4">
+                    Note: First time? Just enter details and click Enter to register automatically (Demo Mode).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT (Hidden until logged in) -->
+    <div id="app-content" class="hidden flex-col h-full">
+        
+        <!-- HEADER -->
+        <header class="bg-white shadow-sm z-10">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-pink-100 p-2 rounded-full text-pink-600">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Wedding Prep</h1>
+                        <p class="text-xs text-gray-500" id="user-display">Logged in as Family</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-500 text-sm">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+            
+            <!-- NAVIGATION TABS -->
+            <nav class="flex overflow-x-auto border-b border-gray-200 px-4 text-sm font-medium text-gray-600">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active px-4 py-3 whitespace-nowrap">Dashboard</button>
+                <button onclick="switchTab('guests')" id="tab-guests" class="tab-btn px-4 py-3 whitespace-nowrap">Guest List</button>
+                <button onclick="switchTab('lenden')" id="tab-lenden" class="tab-btn px-4 py-3 whitespace-nowrap">Len-Den (Gifts)</button>
+                <button onclick="switchTab('tasks')" id="tab-tasks" class="tab-btn px-4 py-3 whitespace-nowrap">Tasks</button>
+            </nav>
+        </header>
+
+        <!-- SCROLLABLE CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 custom-scroll relative">
+            
+            <!-- TAB: DASHBOARD -->
+            <div id="view-dashboard" class="space-y-6 max-w-6xl mx-auto">
+                <!-- Countdown -->
+                <div class="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg">
+                    <p class="uppercase tracking-widest text-xs opacity-80 mb-1">Time Remaining</p>
+                    <h2 class="text-3xl font-bold mb-2">The Big Day</h2>
+                    <div class="flex justify-center gap-4 text-center">
+                        <div class="bg-white/20 rounded-lg p-2 min-w-[60px]"><span class="block text-xl font-bold">124</span><span class="text-xs">Days</span></div>
+                        <div class="bg-white/20 rounded-lg p-2 min-w-[60px]"><span class="block text-xl font-bold">14</span><span class="text-xs">Hrs</span></div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-yellow-400">
+                        <p class="text-gray-500 text-xs">Total Guests</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="stat-total-guests">0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-400">
+                        <p class="text-gray-500 text-xs">Ladkewale</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="stat-ladkewale">0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-400">
+                        <p class="text-gray-500 text-xs">Ladkiwale</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="stat-ladkiwale">0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-400">
+                        <p class="text-gray-500 text-xs">Pending Tasks</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="stat-tasks">0</h3>
+                    </div>
+                </div>
+
+                <!-- Event Breakdown -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Event Headcounts</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-orange-50 p-3 rounded-lg">
+                            <span class="block text-orange-600 font-bold text-xl" id="count-mehendi">0</span>
+                            <span class="text-xs text-gray-500">Mehendi</span>
+                        </div>
+                        <div class="bg-pink-50 p-3 rounded-lg">
+                            <span class="block text-pink-600 font-bold text-xl" id="count-sangeet">0</span>
+                            <span class="text-xs text-gray-500">Sangeet</span>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-lg">
+                            <span class="block text-red-600 font-bold text-xl" id="count-wedding">0</span>
+                            <span class="text-xs text-gray-500">Wedding</span>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <span class="block text-purple-600 font-bold text-xl" id="count-reception">0</span>
+                            <span class="text-xs text-gray-500">Reception</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: GUEST LIST -->
+            <div id="view-guests" class="hidden space-y-4 max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 class="text-xl font-bold text-gray-800">Master Guest List</h2>
+                    <button onclick="openModal('guest-modal')" class="bg-pink-600 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-700 flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-plus"></i> Add Guest
+                    </button>
+                </div>
+
+                <!-- Responsive Table Wrapper -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 text-gray-600 font-medium">
+                            <tr>
+                                <th class="px-4 py-3">Name</th>
+                                <th class="px-4 py-3">Side</th>
+                                <th class="px-4 py-3 text-center">Meh</th>
+                                <th class="px-4 py-3 text-center">San</th>
+                                <th class="px-4 py-3 text-center">Wed</th>
+                                <th class="px-4 py-3 text-center">Rec</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guest-list-body" class="divide-y divide-gray-100">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: LEN-DEN (GIFTS) -->
+            <div id="view-lenden" class="hidden space-y-4 max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Len-Den (Exchange)</h2>
+                    <button onclick="openModal('gift-modal')" class="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 text-sm">
+                        <i class="fa-solid fa-plus"></i> Request Item
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Column 1: Ladkewale Needs -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-blue-500">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <div>
+                                <h3 class="font-bold text-blue-800">Ladkewale Requirements</h3>
+                                <p class="text-xs text-gray-500">To be bought by Ladkiwale</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">Groom's Wishlist</span>
+                        </div>
+                        <div id="list-ladkewale-needs" class="space-y-2">
+                            <!-- Items go here -->
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Ladkiwale Needs -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-pink-500">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <div>
+                                <h3 class="font-bold text-pink-800">Ladkiwale Requirements</h3>
+                                <p class="text-xs text-gray-500">To be bought by Ladkewale</p>
+                            </div>
+                            <span class="bg-pink-100 text-pink-600 text-xs px-2 py-1 rounded-full">Bride's Wishlist</span>
+                        </div>
+                        <div id="list-ladkiwale-needs" class="space-y-2">
+                            <!-- Items go here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: TASKS -->
+            <div id="view-tasks" class="hidden space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Shared Tasks</h2>
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="new-task-input" placeholder="Add a new task..." class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <button onclick="addTask()" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900">Add</button>
+                    </div>
+                    <ul id="task-list" class="space-y-2">
+                        <!-- Tasks go here -->
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Add Guest Modal -->
+    <div id="guest-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="bg-gray-100 px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-gray-700">Add New Guest</h3>
+                <button onclick="closeModal('guest-modal')" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="text" id="guest-name" placeholder="Guest Name" class="w-full border p-2 rounded">
+                <input type="text" id="guest-relation" placeholder="Relation (e.g. Masi, Friend)" class="w-full border p-2 rounded">
+                <select id="guest-side" class="w-full border p-2 rounded bg-white">
+                    <option value="ladkewale">Ladkewale (Groom Side)</option>
+                    <option value="ladkiwale">Ladkiwale (Bride Side)</option>
+                </select>
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <label class="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input type="checkbox" id="check-mehendi" class="w-4 h-4 text-pink-600"> <span class="text-sm">Mehendi</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input type="checkbox" id="check-sangeet" class="w-4 h-4 text-pink-600" checked> <span class="text-sm">Sangeet</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input type="checkbox" id="check-wedding" class="w-4 h-4 text-pink-600" checked> <span class="text-sm">Wedding</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input type="checkbox" id="check-reception" class="w-4 h-4 text-pink-600" checked> <span class="text-sm">Reception</span>
+                    </label>
+                </div>
+                <button onclick="submitGuest()" class="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 mt-2">Save Guest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Gift Modal -->
+    <div id="gift-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="bg-gray-100 px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-gray-700">Add Item Request</h3>
+                <button onclick="closeModal('gift-modal')" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="text" id="gift-item" placeholder="Item Name (e.g. Suit for Papa)" class="w-full border p-2 rounded">
+                <input type="text" id="gift-details" placeholder="Details/Size/Color" class="w-full border p-2 rounded">
+                <div class="text-sm text-gray-500 bg-yellow-50 p-3 rounded">
+                    Requesting on behalf of: <span id="gift-requesting-side" class="font-bold capitalize">--</span>
+                </div>
+                <button onclick="submitGift()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 mt-2">Add Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        // ==========================================
+        // CONFIGURATION SECTION
+        // ==========================================
+        
+        // --- YOUR FIREBASE CONFIG (Injected & Ready) ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDDEjEBSI8yhEQ1ZUqbhIiODAH1Oz2f47w",
+          authDomain: "mariage-fb225.firebaseapp.com",
+          projectId: "mariage-fb225",
+          storageBucket: "mariage-fb225.firebasestorage.app",
+          messagingSenderId: "681015169448",
+          appId: "1:681015169448:web:c9f1da755e6efcc84c0d9d",
+          measurementId: "G-88ZG62461G"
+        };
+        // ---------------------------------------------------
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Global State
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let userSide = "ladkewale"; // default
+        let isDemoMode = true; // Falls back to local storage if firebase fails
+
+        // MOCK DATA FOR DEMO MODE
+        const mockGuests = [
+            { id: 1, name: "Ramesh Uncle", side: "ladkewale", events: { meh: false, san: true, wed: true, rec: true } },
+            { id: 2, name: "Sita Masi", side: "ladkiwale", events: { meh: true, san: true, wed: true, rec: true } },
+        ];
+        const mockGifts = [
+            { id: 1, item: "Sherwani Fabric", details: "Cream color", reqBy: "ladkewale", status: "pending" },
+            { id: 2, item: "Gold Chain", details: "For Groom", reqBy: "ladkiwale", status: "bought" },
+        ];
+        const mockTasks = [
+            { id: 1, text: "Book Photographer", done: true },
+            { id: 2, text: "Finalize Menu", done: false },
+        ];
+
+        // --- INIT FIREBASE SAFELY ---
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isDemoMode = false;
+            console.log("Firebase Connected Successfully!");
+        } catch (e) {
+            console.warn("Firebase Connection Failed. Reason:", e);
+            console.warn("Running in DEMO MODE (Local Storage)");
+            isDemoMode = true;
+        }
+
+        // --- AUTH FUNCTIONS ---
+        window.handleLogin = async () => {
+            const email = document.getElementById('email').value || "demo@wedding.com";
+            const password = document.getElementById('password').value || "demo123";
+            const sideRadio = document.querySelector('input[name="familySide"]:checked').value;
+            
+            userSide = sideRadio;
+            
+            if (!isDemoMode) {
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    alert("Login failed: " + error.message + "\n(Note: You need to create users in Firebase Console first, or just use Demo Mode)");
+                }
+            } else {
+                // Fake Login
+                currentUser = { email: email, side: userSide };
+                showApp();
+            }
+        };
+
+        window.logout = () => {
+            if (!isDemoMode) signOut(auth);
+            else window.location.reload();
+        };
+
+        function showApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            document.getElementById('app-content').classList.add('flex');
+            document.getElementById('user-display').innerText = `Logged in as ${userSide.toUpperCase()} Family`;
+            
+            // Set modal hidden input defaults
+            document.getElementById('gift-requesting-side').innerText = userSide;
+            
+            loadData();
+        }
+
+        if (!isDemoMode) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    // In a real app, we'd store 'side' in the user profile. 
+                    // Here we assume session storage or re-selection for simplicity.
+                    showApp();
+                } else {
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('app-content').classList.add('hidden');
+                }
+            });
+        }
+
+        // --- DATA LOADERS ---
+        function loadData() {
+            if (isDemoMode) {
+                renderGuests(mockGuests);
+                renderGifts(mockGifts);
+                renderTasks(mockTasks);
+            } else {
+                // Real Listeners
+                const qGuests = query(collection(db, "guests"), orderBy("name"));
+                onSnapshot(qGuests, (snapshot) => {
+                    const guests = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    renderGuests(guests);
+                });
+
+                const qGifts = query(collection(db, "gifts"));
+                onSnapshot(qGifts, (snapshot) => {
+                    const gifts = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    renderGifts(gifts);
+                });
+
+                const qTasks = query(collection(db, "tasks"), orderBy("createdAt"));
+                onSnapshot(qTasks, (snapshot) => {
+                    const tasks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    renderTasks(tasks);
+                });
+            }
+        }
+
+        // --- RENDERERS ---
+        function renderGuests(guests) {
+            const tbody = document.getElementById('guest-list-body');
+            tbody.innerHTML = '';
+            
+            let stats = { total: 0, ladkewale: 0, ladkiwale: 0, meh: 0, san: 0, wed: 0, rec: 0 };
+
+            guests.forEach(g => {
+                // Update Stats
+                stats.total++;
+                if (g.side === 'ladkewale') stats.ladkewale++; else stats.ladkiwale++;
+                if (g.events.meh) stats.meh++;
+                if (g.events.san) stats.san++;
+                if (g.events.wed) stats.wed++;
+                if (g.events.rec) stats.rec++;
+
+                // Row Color Logic
+                const sideColor = g.side === 'ladkewale' ? 'text-blue-600 bg-blue-50' : 'text-pink-600 bg-pink-50';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-800">
+                        ${g.name}
+                        <div class="text-xs text-gray-400 font-normal">${g.relation || ''}</div>
+                    </td>
+                    <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-bold uppercase ${sideColor}">${g.side}</span></td>
+                    <td class="px-4 py-3 text-center">${renderCheck(g, 'meh')}</td>
+                    <td class="px-4 py-3 text-center">${renderCheck(g, 'san')}</td>
+                    <td class="px-4 py-3 text-center">${renderCheck(g, 'wed')}</td>
+                    <td class="px-4 py-3 text-center">${renderCheck(g, 'rec')}</td>
+                    <td class="px-4 py-3 text-right">
+                        <button onclick="deleteItem('guests', '${g.id}')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update Dashboard UI
+            document.getElementById('stat-total-guests').innerText = stats.total;
+            document.getElementById('stat-ladkewale').innerText = stats.ladkewale;
+            document.getElementById('stat-ladkiwale').innerText = stats.ladkiwale;
+            document.getElementById('count-mehendi').innerText = stats.meh;
+            document.getElementById('count-sangeet').innerText = stats.san;
+            document.getElementById('count-wedding').innerText = stats.wed;
+            document.getElementById('count-reception').innerText = stats.rec;
+        }
+
+        function renderCheck(guest, eventKey) {
+            const isChecked = guest.events[eventKey];
+            const icon = isChecked ? 'fa-circle-check text-green-500' : 'fa-circle text-gray-200';
+            // Click handler uses global scope exposure logic below
+            return `<i class="fa-regular ${icon} text-lg cursor-pointer" onclick="toggleEvent('${guest.id}', '${eventKey}', ${!isChecked})"></i>`;
+        }
+
+        function renderGifts(gifts) {
+            const listLadkewale = document.getElementById('list-ladkewale-needs');
+            const listLadkiwale = document.getElementById('list-ladkiwale-needs');
+            
+            listLadkewale.innerHTML = '';
+            listLadkiwale.innerHTML = '';
+
+            gifts.forEach(g => {
+                const isDone = g.status === 'bought';
+                const container = g.reqBy === 'ladkewale' ? listLadkewale : listLadkiwale;
+                const buyerSide = g.reqBy === 'ladkewale' ? 'ladkiwale' : 'ladkewale';
+                
+                // You can only mark as done if you are the BUYER (opposite side)
+                const canToggle = isDemoMode || userSide === buyerSide; 
+                const btnClass = isDone ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400 hover:bg-gray-200';
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg border flex justify-between items-center ${isDone ? 'bg-gray-50 opacity-75' : 'bg-white'}`;
+                div.innerHTML = `
+                    <div>
+                        <p class="font-medium ${isDone ? 'line-through text-gray-400' : 'text-gray-800'}">${g.item}</p>
+                        <p class="text-xs text-gray-500">${g.details}</p>
+                    </div>
+                    <button ${canToggle ? '' : 'disabled'} onclick="toggleGift('${g.id}', '${isDone ? 'pending' : 'bought'}')" class="px-3 py-1 rounded text-xs font-bold transition ${btnClass}">
+                        ${isDone ? 'BOUGHT' : 'MARK BOUGHT'}
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderTasks(tasks) {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+            document.getElementById('stat-tasks').innerText = tasks.filter(t => !t.done).length;
+
+            tasks.forEach(t => {
+                const li = document.createElement('li');
+                li.className = "flex items-center gap-3 p-3 bg-white border rounded-lg shadow-sm";
+                li.innerHTML = `
+                    <div onclick="toggleTask('${t.id}', ${!t.done})" class="cursor-pointer ${t.done ? 'text-green-500' : 'text-gray-300'}">
+                        <i class="fa-solid ${t.done ? 'fa-circle-check' : 'fa-circle'} text-xl"></i>
+                    </div>
+                    <span class="flex-1 ${t.done ? 'line-through text-gray-400' : 'text-gray-800'}">${t.text}</span>
+                    <button onclick="deleteItem('tasks', '${t.id}')" class="text-xs text-red-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // --- ACTIONS ---
+
+        // Exposed to Window for HTML onClick
+        window.switchTab = (tabName) => {
+            // UI Update
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-bottom'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // View Update
+            ['dashboard', 'guests', 'lenden', 'tasks'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        };
+
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // GUEST ACTIONS
+        window.submitGuest = async () => {
+            const name = document.getElementById('guest-name').value;
+            if(!name) return;
+
+            const newGuest = {
+                name: name,
+                relation: document.getElementById('guest-relation').value,
+                side: document.getElementById('guest-side').value,
+                events: {
+                    meh: document.getElementById('check-mehendi').checked,
+                    san: document.getElementById('check-sangeet').checked,
+                    wed: document.getElementById('check-wedding').checked,
+                    rec: document.getElementById('check-reception').checked,
+                },
+                addedBy: userSide,
+                createdAt: new Date()
+            };
+
+            if(isDemoMode) {
+                mockGuests.push({id: Date.now(), ...newGuest});
+                renderGuests(mockGuests);
+            } else {
+                await addDoc(collection(db, "guests"), newGuest);
+            }
+            closeModal('guest-modal');
+            document.getElementById('guest-name').value = ''; // Reset
+        };
+
+        window.toggleEvent = async (id, eventKey, newVal) => {
+            if(isDemoMode) {
+                const g = mockGuests.find(x => x.id == id);
+                if(g) { g.events[eventKey] = newVal; renderGuests(mockGuests); }
+            } else {
+                await updateDoc(doc(db, "guests", id), { [`events.${eventKey}`]: newVal });
+            }
+        };
+
+        // GIFT ACTIONS
+        window.submitGift = async () => {
+            const item = document.getElementById('gift-item').value;
+            if(!item) return;
+
+            const newGift = {
+                item: item,
+                details: document.getElementById('gift-details').value,
+                reqBy: userSide, // The logged in user's side is requesting this
+                status: 'pending',
+                createdAt: new Date()
+            };
+
+            if(isDemoMode) {
+                mockGifts.push({id: Date.now(), ...newGift});
+                renderGifts(mockGifts);
+            } else {
+                await addDoc(collection(db, "gifts"), newGift);
+            }
+            closeModal('gift-modal');
+        };
+
+        window.toggleGift = async (id, status) => {
+             if(isDemoMode) {
+                const g = mockGifts.find(x => x.id == id);
+                if(g) { g.status = status; renderGifts(mockGifts); }
+            } else {
+                await updateDoc(doc(db, "gifts", id), { status: status });
+            }
+        };
+
+        // TASK ACTIONS
+        window.addTask = async () => {
+            const text = document.getElementById('new-task-input').value;
+            if(!text) return;
+
+            if(isDemoMode) {
+                mockTasks.push({id: Date.now(), text: text, done: false});
+                renderTasks(mockTasks);
+            } else {
+                await addDoc(collection(db, "tasks"), { text: text, done: false, createdAt: new Date() });
+            }
+            document.getElementById('new-task-input').value = '';
+        };
+
+        window.toggleTask = async (id, status) => {
+            if(isDemoMode) {
+                const t = mockTasks.find(x => x.id == id);
+                if(t) { t.done = status; renderTasks(mockTasks); }
+            } else {
+                await updateDoc(doc(db, "tasks", id), { done: status });
+            }
+        };
+
+        window.deleteItem = async (col, id) => {
+            if(!confirm("Are you sure?")) return;
+            if(isDemoMode) {
+                if(col === 'guests') { const idx = mockGuests.findIndex(x=>x.id==id); mockGuests.splice(idx,1); renderGuests(mockGuests); }
+                if(col === 'tasks') { const idx = mockTasks.findIndex(x=>x.id==id); mockTasks.splice(idx,1); renderTasks(mockTasks); }
+            } else {
+                await deleteDoc(doc(db, col, id));
+            }
+        }
+    </script>
+</body>
+</html>
